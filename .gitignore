@@ -64,3 +64,6 @@ cmake-build-*/
 
 # IntelliJ build output
 out/
+
+# Sound samples generated
+exports
