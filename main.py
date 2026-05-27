@@ -1,24 +1,21 @@
-import time
-
-from Synthesizer import calc_note
-from Synthesizer import Waveform as wf
-from Synthesizer import Synthesizer as Synth
-from LSystem import LSystem as LS
-import Track
+from LSystem import SimpleLS as SLS
+from LSInterpreter import SimpleInterpreter as SI
 
 SAMPLE_RATE = 44100
 
 
 def main():
-    synth = Synth(wf.SINE, SAMPLE_RATE)
-    track = Track.Track(SAMPLE_RATE)
-
-    grammar = {
+    rules = {
         'F': 'F[-F]F[+F][F]'
     }
 
-    ls = LS(grammar)
-    print(ls.generate('F', 3))
+    ls = SLS(rules)
+    sequence = ls.generate('F', 3)
+
+    interpreter = SI()
+    interpreter.interpret(sequence)
+    interpreter.play()
+    # interpreter.track.write('TestLSystemSimple')
 
 
 if __name__ == '__main__':

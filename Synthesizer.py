@@ -1,11 +1,18 @@
-import time
-
 import numpy as np
 import math
 
 
 def calc_note(note):
-    return 2**(note/12)*440
+    return 2**(note/12)*220
+
+
+def scale_note(index, scale):
+    scale_len = len(scale)
+
+    octave = math.floor(index / scale_len)
+    degree = index % scale_len
+
+    return scale[degree] + octave * 12
 
 
 def _generate_wavetable(waveform, length=64):
@@ -34,26 +41,36 @@ class Synthesizer:
     def set_sample_rate(self, sample_rate):
         self._sample_rate = sample_rate
 
+    def get_sample_rate(self):
+        return self._sample_rate
+
     def set_gain(self, gain):
         self._gain = gain
 
-    def play(self, frequency, t):
-        num_samples = math.ceil(t * self._sample_rate)
+    def play(self, frequency, note_length, adsr=None):
         wt = self._wavetable
         wt_length = len(wt)
 
         index_increment = frequency * wt_length / self._sample_rate
 
+        if adsr is None:
+            num_samples = math.ceil(note_length * self._sample_rate)
+            env = None
+        else:
+            env = adsr.envelope(note_length, self._sample_rate)
+            num_samples = len(env)
+
         indices = (np.arange(num_samples) * index_increment) % wt_length
 
         i0 = np.floor(indices).astype(np.int32)
         i1 = (i0 + 1) % wt_length
-
         frac = indices - i0
 
         output = wt[i0] + frac * (wt[i1] - wt[i0])
 
-        amplitude = 10 ** (self._gain / 20)
-        output *= amplitude
+        output *= 10 ** (self._gain / 20)
 
-        return output
+        if env is not None:
+            output *= env
+
+        return output.astype(np.float32)

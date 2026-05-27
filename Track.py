@@ -5,24 +5,6 @@ import sounddevice as sd
 import scipy.io.wavfile as wav
 
 
-def fade_in(signal, fade_length=10000):
-    fade = (1 - np.cos(np.linspace(0, np.pi, fade_length))) * 0.5
-    signal[:fade_length] = np.multiply(fade, signal[:fade_length])
-
-    return signal
-
-
-def fade_out(signal, fade_length=10000):
-    fade = np.flip((1 - np.cos(np.linspace(0, np.pi, fade_length))) * 0.5)
-    signal[-fade_length:] = np.multiply(fade, signal[-fade_length:])
-
-    return signal
-
-
-def fade_in_out(signal, fade_length=10000):
-    return fade_in(fade_out(signal, fade_length), fade_length)
-
-
 def _extend_start(signal, amount):
     silence = np.zeros((math.ceil(amount),))
     return np.append(silence, signal)
