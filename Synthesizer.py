@@ -2,10 +2,6 @@ import numpy as np
 import math
 
 
-def calc_note(note):
-    return 2**(note/12)*220
-
-
 def scale_note(index, scale):
     scale_len = len(scale)
 
@@ -30,10 +26,11 @@ class Waveform:
 
 
 class Synthesizer:
-    def __init__(self, waveform=Waveform, sample_rate=44100):
+    def __init__(self, waveform=Waveform, sample_rate=44100, base_note=220):
         self._wavetable = _generate_wavetable(waveform)
         self._sample_rate = sample_rate
         self._gain = -20
+        self._base_note = base_note
 
     def set_waveform(self, waveform):
         self._wavetable = _generate_wavetable(waveform)
@@ -44,8 +41,17 @@ class Synthesizer:
     def get_sample_rate(self):
         return self._sample_rate
 
-    def set_gain(self, gain):
-        self._gain = gain
+    def adjust_gain(self, gain):
+        self._gain += gain
+
+    def set_base_note(self, frequency):
+        self._base_note = frequency
+
+    def get_base_note(self):
+        return self._base_note
+
+    def calc_note(self, note):
+        return 2 ** (note / 12) * self._base_note
 
     def play(self, frequency, note_length, adsr=None):
         wt = self._wavetable
